@@ -219,15 +219,10 @@ class FacebookProxy extends \lithium\core\StaticObject {
 		return static::_filter(__FUNCTION__, $params, function($self, $params) {
 			extract($params);
 
-			if ($self::$_validateConfiguration){
-				$self::invokeMethod('checkConfiguration',$config);
-			}
 			if ($config){
 				$self::config($config);
 			}
-			$self::invokeMethod('_checkApiAvailability');
 			$self::invokeMethod('_requireFacebookApi');
-			$self::invokeMethod('_checkApiCompatibility');
 			$apiInstance = new \Facebook($self::config());
 			if (!$apiInstance){
 				throw new Exception('Facebook Api cant instanciated!');
@@ -235,54 +230,6 @@ class FacebookProxy extends \lithium\core\StaticObject {
 			$self::$_facebookApiInstance = $apiInstance;
 			return $apiInstance;
 		});
-	}
-
-	/**
-	 * checks the configuration against Problems (and unsupported features)
-	 *
-	 * @todo finish this!
-	 *
-	 * @throws Exceptions if there are problems
-	 *
-	 * @param array $config
-	 * @return boolean
-	 * @filter This method may be filtered.
-	 */
-	public static function checkConfiguration($config = array()){
-		$params = compact('config');
-		return static::_filter(__FUNCTION__, $params, function($self, $params) {
-			extract($params);
-
-			if (!$config){
-			$config = $self::invokeMethod('config');
-			}
-			if (empty($config['appId'])){
-				throw new ConfigException('Configuration: `appId` should be set');
-			}
-			if (empty($config['secret'])){
-				throw new ConfigException('Configuration: `secret` should be set');
-			}
-			if (!empty($config['cookie'])){
-				throw new ConfigException('Configuration: `cookie` not yet supported');
-			}
-			if (!empty($config['domain'])){
-				throw new ConfigException('Configuration: `domain` not yet supported');
-			}
-			if (!empty($config['fileUpload'])){
-				throw new ConfigException('Configuration: `fileUpload` not yet supported');
-			}
-			return true;
-		});
-	}
-
-	/**
-	 * Fetches the ApiPath and checks if the Api is there
-	 */
-	protected static function _checkApiAvailability(){
-		$fbLib = static::_getApiPath();
-		if (!\file_exists($fbLib)){
-			throw new ClassNotFoundException('Facebook Lib not there! Do git submoule init first!');
-		}
 	}
 
 	/**
@@ -309,19 +256,6 @@ class FacebookProxy extends \lithium\core\StaticObject {
 	 */
 	protected static function _requireFacebookApi(){
 		require_once static::_getApiPath();
-	}
-
-	/**
-	 * Checks the ApiVersion against this Proxy capabilities
-	 *
-	 * @throws Exception if the Library is not compatible
-	 * @return void
-	 */
-	protected static function _checkApiCompatibility(){
-		$versions = static::$__compatibleApiVersions;
-		if (!\array_key_exists(\Facebook::VERSION, $versions)){
-			throw new Exception('Facebook Library is not compatible to our library');
-		}
 	}
 
 	/**
