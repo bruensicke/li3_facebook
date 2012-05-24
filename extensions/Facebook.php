@@ -30,31 +30,6 @@ class Facebook extends \lithium\core\StaticObject {
 	protected static $_defaults = array(
 		'appId' => '',
 		'secret' => '',
-		'cookie' => false,
-		'domain' => false,
-		'fileUpload' => false
-	);
-
-	/**
-	 * If true, class will automatically fetch data from libraries settings
-	 * Set this to false if you want to do configuration manually or in debug mode
-	 * @var boolean
-	 */
-	public static $_autoConfigure = true;
-
-	/**
-	 * If false, given Config wont be validated
-	 * @var boolean
-	 */
-	public static $_validateConfiguration = true;
-
-	/**
-	 * Holds the Facebook Api Version Strings. associated to the
-	 * tested git hash (just for debug info)
-	 * @var array of Version Strings
-	 */
-	public static $__compatibleApiVersions = array(
-		'2.1.2' => '04168d544f71293fab7622fa81161eef51db808e'
 	);
 
 	/**
@@ -74,10 +49,8 @@ class Facebook extends \lithium\core\StaticObject {
 	 * @return void
 	 */
 	public static function __init() {
-		if (static::$_autoConfigure){
-			$libraryConfig = Libraries::get('li3_facebook');
-			static::config($libraryConfig + static::$_defaults);
-		}
+		$libraryConfig = Libraries::get('li3_facebook');
+		static::config($libraryConfig + static::$_defaults);
 
 		/* wont work */
 		/*
@@ -175,8 +148,7 @@ class Facebook extends \lithium\core\StaticObject {
 				$self::invokeMethod('instanciateFacebookApi');
 			}
 
-			//@todo: insert callable existance check here!
-			if (!\is_callable(array($self::$_facebookApiInstance,$method))){
+			if (!is_callable(array($self::$_facebookApiInstance,$method))){
 				throw new Exception(__CLASS__ . " Method `$method` is not callable");
 			}
 
@@ -222,7 +194,7 @@ class Facebook extends \lithium\core\StaticObject {
 			if ($config){
 				$self::config($config);
 			}
-			$self::invokeMethod('_requireFacebookApi');
+			require_once LI3_FACEBOOK_PATH . '/libraries/facebook-sdk/src/facebook.php';
 			$apiInstance = new \Facebook($self::config());
 			if (!$apiInstance){
 				throw new Exception('Facebook Api cant instanciated!');
@@ -230,32 +202,6 @@ class Facebook extends \lithium\core\StaticObject {
 			$self::$_facebookApiInstance = $apiInstance;
 			return $apiInstance;
 		});
-	}
-
-	/**
-	 * constructs the Api Path by this file
-	 * @return string full Path to the FacebookApi
-	 * @filter This method may be filtered.
-	 */
-	protected static function _getApiPath(){
-		$params = array();
-		return static::_filter(__FUNCTION__, $params, function($self, $params) {
-			extract($params);
-
-			$currentPath = dirname(__FILE__);
-			$fbLib = $currentPath . '/../libraries/facebook-sdk/src/facebook.php';
-			return \realpath($fbLib);
-		});
-	}
-
-	/**
-	 * Requires the Facebok Api.
-	 *
-	 * @throws (rethrows) Exception if curl or json_decode not reachable!
-	 * @return void
-	 */
-	protected static function _requireFacebookApi(){
-		require_once static::_getApiPath();
 	}
 
 	/**

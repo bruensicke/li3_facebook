@@ -28,8 +28,6 @@ class Facebook extends \lithium\core\Object {
 	 * Called by the `Auth` class to run an authentication check against the Facebook API
 	 * and returns an array of user information on success, or `false` on failure.
 	 * 
-	 * @todo move the FacebookConfig::checkConfiguration part into the __init?
-	 * 
 	 * @throws lithium\core\ConfigException if the facebook App credentials arent set
 	 *
 	 * @param object $credentials A data container which wraps the authentication credentials used
@@ -38,29 +36,31 @@ class Facebook extends \lithium\core\Object {
 	 * @param array $options Options which include the options for session key names and also FB API method options.
 	 * @return array Returns an array containing user information on success, or `false` on failure.
 	 */
-	public function check($credentials, array $options = array()) {
-		FacebookProxy::checkConfiguration();
-		
-		//get Url
-		$base  = $credentials->env('HTTPS') ? 'https://' : 'http://';
-		$base .= $credentials->env('HTTP_HOST');
-		$base .= $credentials->env('base');
-		
-		$facebook_config = Libraries::get('li3_facebook');
-		// get the options from the li3_facebook library configuration if set there
-		$options += $facebook_config;
-		
-		// otherwise, set some defaults
+	public function check($request, array $options = array()) {
+		$base  = $request->env('HTTPS') ? 'https://' : 'http://';
+		$base .= $request->env('HTTP_HOST');
+		$base .= $request->env('base');
 		$defaults = array(
-			'logout_url_options' => array(
-				'next' => $base
-			),
-			'login_url_options' => array(
-			),
+			'base' => $base,
+			'session.name' => 'fb',
 			'logout_url_session_key' => 'fb_logout_url',
 			'login_url_session_key' => 'fb_login_url',
 			'local_fb_session_name' => 'fb_session'
 		);
+		$options += $defaults;
+		$options += Libraries::get('li3_facebook');
+		
+		// otherwise, set some defaults
+		// $defaults = array(
+		// 	'logout_url_options' => array(
+		// 		'next' => $base
+		// 	),
+		// 	'login_url_options' => array(
+		// 	),
+		// 	'logout_url_session_key' => 'fb_logout_url',
+		// 	'login_url_session_key' => 'fb_login_url',
+		// 	'local_fb_session_name' => 'fb_session'
+		// );
 		
 		/**
 		 * If the adapter config() has those keys set, then use those as the default values.
@@ -84,24 +84,15 @@ class Facebook extends \lithium\core\Object {
 		
 		// combine the defults with the options passed, giving those passed options the priority
 		$options += $defaults;
-		
-		$user_data = false;
-		
-		$session = FacebookProxy::getSession();
-		$uid = null;
-		// Session based API call.
-		if ($session) {
-			// Set the session locally
-			Session::write($options['local_fb_session_name'], $session);
-			try {
-				$uid = FacebookProxy::getUser();
-			} catch (Exception $e) {
-				//error_log($e);
-			}
+
+		$user = FacebookProxy::getUser();
+
+		if ($user) {
+			Session::write($options['session.name'], $user);
 		}
 
 		// If $uid is set, then write the fb_logout_url session key
-		if (!empty($uid)) {
+		if (!empty($user)) {
 			if($options['logout_url_session_key']) {
 				Session::write($options['logout_url_session_key'], FacebookProxy::getLogoutUrl($options['logout_url_options']));
 			}
@@ -121,7 +112,7 @@ class Facebook extends \lithium\core\Object {
 			}
 		}
 		
-		return $user_data;
+		return $user;
 	}
 	
 	/**
