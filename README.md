@@ -1,43 +1,45 @@
----
-title: li3_facebook : a Lithium Facebook Library Wrapper
-subtitle: Integration Facebook into your Lithium Framework
-author: weluse GmbH : Marc Schwering
+# li3_facebook
 
----
+Lithium library to interact with facebook. At first, it is a facebook PHP SDK Decorator, but it is more than that.
 
-Lithium the most RAD PHP Framework Facebook Wrapper
-===================================================
+## Installation
 
-This Wrapper is a Lithium PHP Library using the official Facebook PHP SDK.
+Add a submodule to your li3 libraries:
 
-Usage
------
+	git submodule add git@github.com:bruensicke/li3_facebook.git libraries/li3_facebook
 
-This Library is using the official facebook api as a git submodule!
+and activate it in you app (config/bootstrap/libraries.php), of course:
 
-So : Please don't forget to do a git submodule init!
+	Libraries::add('li3_facebook', array(
+		'appId' => 'key'
+		'secret' => 'secret'
+	));
 
-You will need a Facebook API-Key and the Lithium Framework.
-Integrate the Library in the bootstrap process of your lovely li3 App:
+## Usage
 
-Libraries::add('li3_facebook', array(
-	'appId' => key
-	'secret' => yourSuperSecretKey
-));
+	// static calling
+	li3_facebook\extension\Facebook::getAppId($params);
 
-these official Facebook SDK Settings are currently not yet supported.
- - cookie
- - domain
- - fileUpload
+	// or
+	li3_facebook\extension\Facebook::run('getAppId', $params);
 
-if you want to enable those Settings, you have to unset the validation:
+## Other examples
 
-li3_facebook\extension\FacebookProxy::$_validateConfiguration = false;
+	// get user
+	$user = $facebook->getUser();
 
-After Configuration you should able to use it via static calls or direkt method invoking:
+	if ($user) {
+		try {
+			$user_profile = $facebook->api('/me');
+		} catch (FacebookApiException $e) {
+			error_log($e);
+			$user = null;
+		}
+	}
 
-static:
-li3_facebook\extension\FacebookProxy::getAppId($params)
+## Credits
 
-or
-li3_facebook\extension\FacebookProxy::run('getAppId',$params)
+* [li3](http://www.lithify.me)
+* [tmaiaroto](https://github.com/tmaiaroto)
+* [Marc Schwering, weluse GmbH](http://www.weluse.de)
+
