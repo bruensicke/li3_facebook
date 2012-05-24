@@ -15,7 +15,7 @@ use lithium\core\ConfigException;
 * the proxy-pattern which is using the original FB-API as a singleton.
 * It has to be configured by an api key and the secret.
 */
-class FacebookProxy extends \lithium\core\StaticObject {
+class Facebook extends \lithium\core\StaticObject {
 
 	/**
 	 * Holds the configuration Options

@@ -8,11 +8,11 @@
 
 namespace li3_facebook\extensions\adapter\security\auth;
 
-use li3_facebook\extensions\FacebookProxy;
+use li3_facebook\extensions\Facebook as FacebookProxy;
 use lithium\security\Auth;
 use lithium\storage\Session;
 use lithium\core\Libraries;
-use \Exception;
+use Exception;
 
 /**
  * Extends Lithium's Auth adapter to look for a Facebook session
