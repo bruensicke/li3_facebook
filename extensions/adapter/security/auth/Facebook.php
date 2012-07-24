@@ -43,25 +43,18 @@ class Facebook extends \lithium\core\Object {
 		$defaults = array(
 			'base' => $base,
 			'session.name' => 'fb',
+			'logout_url_options' => array(
+				'next' => $base
+			),
+			'login_url_options' => array(
+			),
 			'logout_url_session_key' => 'fb_logout_url',
 			'login_url_session_key' => 'fb_login_url',
 			'local_fb_session_name' => 'fb_session'
 		);
 		$options += $defaults;
 		$options += Libraries::get('li3_facebook');
-		
-		// otherwise, set some defaults
-		// $defaults = array(
-		// 	'logout_url_options' => array(
-		// 		'next' => $base
-		// 	),
-		// 	'login_url_options' => array(
-		// 	),
-		// 	'logout_url_session_key' => 'fb_logout_url',
-		// 	'login_url_session_key' => 'fb_login_url',
-		// 	'local_fb_session_name' => 'fb_session'
-		// );
-		
+
 		/**
 		 * If the adapter config() has those keys set, then use those as the default values.
 		 * This allows various adapters to be created all which can change the options for logging in and out
@@ -86,6 +79,7 @@ class Facebook extends \lithium\core\Object {
 		$options += $defaults;
 
 		$user = FacebookProxy::getUser();
+			// debug($user);
 
 		if ($user) {
 			Session::write($options['session.name'], $user);
@@ -97,13 +91,7 @@ class Facebook extends \lithium\core\Object {
 				Session::write($options['logout_url_session_key'], FacebookProxy::getLogoutUrl($options['logout_url_options']));
 			}
 
-			// Get the user data to return
-			$user_data = array();
-			try {
-				$user_data = FacebookProxy::api('/me');
-			} catch(Exception $e) {
-				//error_log($e);
-			}
+			$user_data = FacebookProxy::api('/me');
 
 		} else {
 			// Else, the user hasn't logged in yet, write the fb_login_url session key

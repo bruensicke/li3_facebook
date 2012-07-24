@@ -8,6 +8,8 @@ namespace li3_facebook\extensions\helper;
 
 use lithium\storage\Session;
 use lithium\core\Libraries;
+use lithium\net\http\Media;
+
 
 class Facebook extends \lithium\template\helper\Html {
 
@@ -29,24 +31,29 @@ class Facebook extends \lithium\template\helper\Html {
 	public function login(array $options = array()) {
 		$defaults = array(
 			'div' => 'fb_login',
-			'button_image' => '/li3_facebook/img/fb-login-button.png',
+			'button_image' => 'img/fb-login-button.png',
+			'base' => $this->_context->request()->base,
 			'button_alt' => 'Login with Facebook',
 			'additional_copy' => null,
             'fb_login_url_session_key' => 'fb_login_url'
 		);
 		$options += $defaults;
 		$output = '';
-		
+
+		$img = Media::asset('img/fb-login-button.png', 'img', array(
+			'library' => 'li3_facebook'
+		));
+
 		$fb_login_url = Session::read($options['fb_login_url_session_key']);
 		if(!empty($fb_login_url)) {
 			if($options['div'] !== false) {
 				$output .= '<div id="' . $options['div'] . '">' . $options['additional_copy'];
 			}
 			
-			$output .= '<a href="' . $fb_login_url . '"><img src="' . $options['button_image'] . '" alt="' . $options['button_alt'] .'" /></a>';
+			$output .= '<a href="' . $fb_login_url . '">fb login <img src="' . $options['base'] . $img . '" alt="' . $options['button_alt'] .'" /></a>';
 			
 			if($options['div'] !== false) {
-				$output .= '</div>hu';
+				$output .= '</div>';
 			}
 		}
 		// debug($output);exit;
