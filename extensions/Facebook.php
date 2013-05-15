@@ -3,7 +3,7 @@
 namespace li3_facebook\extensions;
 
 use lithium\core\Libraries;
-//use lithium\core\Environment;
+use lithium\core\Environment;
 
 use Exception;
 use lithium\core\ClassNotFoundException;
@@ -74,21 +74,18 @@ class Facebook extends \lithium\core\StaticObject {
 	 * @return void
 	 */
 	public static function __init() {
-		if (static::$_autoConfigure){
-			$libraryConfig = Libraries::get('li3_facebook');
-			static::config($libraryConfig + static::$_defaults);
+		if (!static::$_autoConfigure){
+			return;
 		}
 
-		/* wont work */
-		/*
-		 static::applyFilter('invokeMethod', function($self, $params, $chain) {
-			// Custom pre-dispatch logic goes here
-			die("awesome");
-			$response = $chain->next($self, $params, $chain);
-			return $response;
-			});
-		 *
-		 */
+		$env = Environment::get();
+
+		$facebook_config = Libraries::get('li3_facebook');
+		if (!empty($facebook_config[$env])) {
+			$facebook_config = $facebook_config[$env];
+		}
+
+		static::config($facebook_config + static::$_defaults);
 	}
 
 	/**
